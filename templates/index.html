@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Hall Monitoring | AI Proctoring System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #38bdf8;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --primary-btn: #3b82f6;
+            --primary-btn-hover: #2563eb;
+            --danger-btn: #ef4444;
+            --danger-btn-hover: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1600px;
+            min-height: calc(100vh - 160px);
+        }
+
+        .video-container {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            color: white;
+            flex: 1;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-btn);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-btn-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-btn);
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: var(--danger-btn-hover);
+            transform: translateY(-1px);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .log-container {
+            overflow-y: auto;
+            max-height: 500px;
+            min-height: 300px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.5);
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .log-entry.alert {
+            border-left: 3px solid var(--danger-color);
+            color: var(--text-primary);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .video-container {
+                aspect-ratio: 16/9;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            AI <span>Proctoring System</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                System Active
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger"
+                style="flex: 0; padding: 0.5rem 1rem; text-decoration: none; display: flex; align-items: center; justify-content: center;">Logout</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <div class="video-container">
+                <img src="{{ url_for('video_feed') }}" alt="Live Feed" class="video-feed">
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h3 class="card-title">Controls</h3>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="startBtn" class="btn btn-primary" onclick="startMonitoring()">
+                            Start Monitoring
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger" onclick="stopMonitoring()" disabled>
+                            Stop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Session Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value" id="timer">00:00:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Cameras</span>
+                        <span class="stat-value">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">FPS</span>
+                        <span class="stat-value">~30</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Activity Log</h3>
+                    <div class="log-container" id="activityLog">
+                        <div class="log-entry">System initialized...</div>
+                        <div class="log-entry">Waiting for start...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simple timer
+        let seconds = 0;
+        let timerInterval;
+        const timerElement = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function updateTimer() {
+            seconds++;
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            timerElement.textContent = `${h}:${m}:${s}`;
+        }
+
+        async function startMonitoring() {
+            try {
+                const res = await fetch('/start_monitoring', { method: 'POST' });
+                if (res.ok) {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    if (!timerInterval) {
+                        timerInterval = setInterval(updateTimer, 1000);
+                    }
+                    addLog("Monitoring started.");
+                }
+            } catch (err) {
+                console.error('Error starting monitoring:', err);
+            }
+        }
+
+        async function stopMonitoring() {
+            try {
+                const res = await fetch('/stop_monitoring', { method: 'POST' });
+                if (res.ok) {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    addLog("Monitoring stopped.");
+                }
+            } catch (err) {
+                console.error('Error stopping monitoring:', err);
+            }
+        }
+
+        function addLog(message) {
+            const logContainer = document.getElementById('activityLog');
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.prepend(div);
+        }
+
+        // Fetch logs from backend
+        const logContainer = document.getElementById('activityLog');
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/logs');
+                const logs = await response.json();
+
+                // Only update if we have logs
+                if (logs.length === 0) return;
+
+                // Simple approach: Clear container and re-populate
+                logContainer.innerHTML = '';
+
+                [...logs].reverse().forEach(log => {
+                    const div = document.createElement('div');
+                    div.className = 'log-entry alert';
+                    div.textContent = `[${log.timestamp}] ${log.message}`;
+                    logContainer.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+            }
+        }
+
+        // Poll every 1 second
+        setInterval(fetchLogs, 1000);
+    </script>
+</body>
+
+</html>
